@@ -34,7 +34,6 @@ export const fetchItemData = createAsyncThunk(
       snapShot.forEach(doc => {
            toppingData = doc.data().toppingData
       }) 
-      console.log('動いてます')
       // The value we return becomes the `fulfilled` action payload
       return  toppingData;
     }
@@ -53,13 +52,10 @@ export const CommonSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchItemData.fulfilled, (state, action) => {
-        console.log('extraReducersが呼ばれています')
         state.itemData = action.payload;
-      })
-    //   .addCase(fetchItemData.fulfilled,(state, action) => {
-    //     console.log('toppingを取得')
-    //     state.toppingData = action.payload;
-    // })
+      }).addCase(fetchToppingData.fulfilled,(state, action) => {
+        state.toppingData = action.payload;
+    })
   },
 });
 
@@ -69,6 +65,7 @@ export const CommonSlice = createSlice({
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectItemData = (state: RootState) => state.commonSlice.itemData;
+export const selectToppingData = (state: RootState) => state.commonSlice.toppingData;
 
 // We can also write thunks by hand, which may contain both sync and async logic.
 // Here's an example of conditionally dispatching actions based on current state.

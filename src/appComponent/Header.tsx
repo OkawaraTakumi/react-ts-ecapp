@@ -87,7 +87,6 @@ export const Header = () => {
             </Link>
           </Typography>
           <div>
-            {console.log(userName)}
             {userName && <span>ようこそ{userName}さん</span>}
             {/* {uid && uid === ADMIN_ID && (
               <IconButton

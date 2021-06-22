@@ -31,7 +31,7 @@ export const ItemInfo = () => {
   useEffect(() => {
     dispatch(fetchItemData());
     dispatch(fetchToppingData());
-  }, [dispatch]);
+  }, []);
 
   const { itemid } = useParams<{itemid:string}>();
   const items = useSelector((state:RootState) => state.commonSlice.itemData);
@@ -114,22 +114,23 @@ export const ItemInfo = () => {
   };
   const [calcPrice, setCalcPrice] = useState<number>(0);
   useEffect(() => {
-    if (typeof itemRendering !==  'string'){
+    if (typeof itemRendering !== 'string'){
         setCalcPrice(itemRendering.mprice);
+    }else{
     }
   }, [itemRendering]);
 
   useEffect(() => {
     if (sizeValue === 0) {
-        if (typeof itemRendering !==  'string'){
+        if (typeof itemRendering !== 'string'){
             setCalcPrice(itemRendering.mprice);
         }
     } else if (sizeValue === 1) {
-        if (typeof itemRendering !==  'string'){
-            setCalcPrice(itemRendering.mprice);
+        if (typeof itemRendering !== 'string'){
+            setCalcPrice(itemRendering.lprice);
         }
     }
-  }, [sizeValue, itemRendering]);
+  }, [sizeValue]);
 
   //表示合計金額の計算
   useEffect(() => {
