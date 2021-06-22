@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 // import { createcart, fetchcart, updatecart } from "../actions";
+import { fetchCart } from "../Cart/Slice/cartSlice";
 import { useHistory } from "react-router-dom";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { Button, Grid, Select, MenuItem } from "@material-ui/core";
@@ -15,18 +16,19 @@ import {
         sendItemType, 
         toppingWillAddType 
         } from "./Type/itemInfoType";
+import { iteminfoArrayType } from "../Cart/Type/cartType";
 
 export const ItemInfo = () => {
-  const user = useSelector((state:RootState) => state.user.uid);
-//   const cartInfo = useSelector((state) => state.cartinfo); //オブジェクト
+  let uid = useSelector((state:RootState) => state.user.uid);
+  const cartInfo = useSelector((state:RootState) => state.cartSlice.cartInfoBox); //オブジェクト
   const history = useHistory();
   const dispatch = useDispatch();
 
-//   useEffect(() => {
-//     if (user) {
-//       dispatch(fetchcart(user.uid));
-//     }
-//   }, [user]);
+  useEffect(() => {
+    if (uid) {
+      dispatch(fetchCart(uid));
+    }
+  }, [uid ,dispatch]);
   //ここで商品情報を読み込んでおく必要あり
   useEffect(() => {
     dispatch(fetchItemData());
@@ -184,36 +186,37 @@ export const ItemInfo = () => {
             }
           });
         }
-        if(typeof (item.toppings) !== 'number'){
+        if(typeof (item.toppings) !== 'number'&& typeof (item.toppings) !== 'string'){
             item.toppings.push(toppingWillAdd);
         } 
       }
     });
-    // item.id = getUniqueStr();
-    // //ログイン確認してログインしていたらuidを渡す
-    // let uid;
-    // if (user) {
-    //   uid = user.uid;
-    // } else {
-    //   uid = null;
-    // }
-    // //カートにアイテムが入っていたら中身も一緒に渡す。
-    // if (cartInfo) {
-    //   cartInfo.itemInfo = [...cartInfo.itemInfo, item];
-    //   let newCartInfo = JSON.stringify(cartInfo);
-    //   newCartInfo = JSON.parse(newCartInfo);
-    //   dispatch(updatecart(newCartInfo, uid));
-    //   history.push("/cart");
-    //   //入ってなかったら配列に格納して渡す。
-    // } else {
-    //   let newCartInfo = {
-    //     itemInfo: [item],
-    //     status: 0, //カート(あとで定数に置き換える)
-    //     userId: uid,
-    //   };
-    //   dispatch(createcart(newCartInfo, uid));
-    //   history.push("/cart");
-    // }
+    item.id = getUniqueStr();
+    //ログイン確認してログインしていたらuidを渡す
+    if (!uid) {
+      uid = '';
+    } 
+    //カートにアイテムが入っていたら中身も一緒に渡す。
+    if (cartInfo) {
+      if (typeof cartInfo.cartInfo !== 'undefined'){
+        if(typeof cartInfo.cartInfo.iteminfo !== 'undefined'){
+          cartInfo.cartInfo.iteminfo = [...cartInfo.cartInfo.iteminfo, (item as iteminfoArrayType)];
+        }
+      let newCartInfo = JSON.stringify(cartInfo);
+      newCartInfo = JSON.parse(newCartInfo);
+      // dispatch(updatecart(newCartInfo, uid));
+      }
+      history.push("/cart");
+      //入ってなかったら配列に格納して渡す。
+    } else {
+      let newCartInfo = {
+        itemInfo: [item],
+        status: 0, //カート(あとで定数に置き換える)
+        userId: uid,
+      };
+      // dispatch(createcart(newCartInfo, uid));
+      history.push("/cart");
+    }
   };
 
   return (

@@ -12,5 +12,6 @@ export type toppingWillAddType = {
 }
 
 export type sendItemType = {
-    [key:string]:number|toppingWillAddType[];
+    [key:string]:number|string|toppingWillAddType[];
+    
 }
