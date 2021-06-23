@@ -2,8 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
-// import { createcart, fetchcart, updatecart } from "../actions";
-import { fetchCart } from "../Cart/Slice/cartSlice";
+import { fetchCart, createCart, updateCart } from "../Cart/Slice/cartSlice";
 import { useHistory } from "react-router-dom";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { Button, Grid, Select, MenuItem } from "@material-ui/core";
@@ -17,10 +16,11 @@ import {
         toppingWillAddType 
         } from "./Type/itemInfoType";
 import { iteminfoArrayType } from "../Cart/Type/cartType";
+import { cartInfo } from "../Cart/Type/cartType";
 
 export const ItemInfo = () => {
   let uid = useSelector((state:RootState) => state.user.uid);
-  const cartInfo = useSelector((state:RootState) => state.cartSlice.cartInfoBox); //オブジェクト
+  const cartInfo = useSelector((state:RootState) => state.cartSlice.cartInfo); //オブジェクト
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -33,7 +33,7 @@ export const ItemInfo = () => {
   useEffect(() => {
     dispatch(fetchItemData());
     dispatch(fetchToppingData());
-  }, []);
+  }, [dispatch]);
 
   const { itemid } = useParams<{itemid:string}>();
   const items = useSelector((state:RootState) => state.commonSlice.itemData);
@@ -132,7 +132,7 @@ export const ItemInfo = () => {
             setCalcPrice(itemRendering.lprice);
         }
     }
-  }, [sizeValue]);
+  }, [sizeValue,itemRendering]);
 
   //表示合計金額の計算
   useEffect(() => {
@@ -161,6 +161,7 @@ export const ItemInfo = () => {
 
   //カートにアイテムを追加する処理
   const doAddCart = () => {
+    console.log(cartInfo,'カートインフォ');
     //カートに送るデータの準備
     const item:sendItemType = {};
     item.itemId = parseInt(itemid);
@@ -197,24 +198,27 @@ export const ItemInfo = () => {
       uid = '';
     } 
     //カートにアイテムが入っていたら中身も一緒に渡す。
-    if (cartInfo) {
-      if (typeof cartInfo.cartInfo !== 'undefined'){
-        if(typeof cartInfo.cartInfo.iteminfo !== 'undefined'){
-          cartInfo.cartInfo.iteminfo = [...cartInfo.cartInfo.iteminfo, (item as iteminfoArrayType)];
-        }
-      let newCartInfo = JSON.stringify(cartInfo);
+    console.log(cartInfo.iteminfo !== undefined)
+    if (cartInfo.iteminfo !== undefined) {
+      if (typeof cartInfo !== 'undefined'){
+        // if(typeof cartInfo.iteminfo !== 'undefined'){
+        //   // cartInfo.iteminfo = [...(cartInfo.iteminfo), item as iteminfoArrayType];
+        // }
+      let newCartInfo:any = JSON.stringify(cartInfo);
       newCartInfo = JSON.parse(newCartInfo);
-      // dispatch(updatecart(newCartInfo, uid));
+      newCartInfo.iteminfo = [...(cartInfo.iteminfo), item as iteminfoArrayType]
+      dispatch(updateCart({newCartInfo, uid}));
       }
       history.push("/cart");
       //入ってなかったら配列に格納して渡す。
     } else {
-      let newCartInfo = {
-        itemInfo: [item],
+      console.log('アイテムインフォがない')
+      let newCartInfo:cartInfo = {
+        iteminfo: [item],
         status: 0, //カート(あとで定数に置き換える)
         userId: uid,
       };
-      // dispatch(createcart(newCartInfo, uid));
+      dispatch(createCart({newCartInfo, uid}));
       history.push("/cart");
     }
   };

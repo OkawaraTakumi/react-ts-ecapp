@@ -4,7 +4,7 @@ type toppings = {
 }
 
 export type iteminfoArrayType = {
-    id?:string;
+    id?:string|null;
     itemId?: number;
     itemNum?: number;
     itemSize?: number;
@@ -25,9 +25,10 @@ export type cartInfo = {
     totalPrice?: number;
     userId?: string;
     zip?: string;
+    id?:string|null
 }
 
 export type cartInfoBox = {
     cartInfo?:cartInfo;
-    id?: string;
+    id?: string|null;
 }

@@ -1,43 +1,69 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState} from '../../../app/store';
 import { db } from '../../../firebase';
-import { cartInfoBox } from '../Type/cartType';
+import { cartInfo } from '../Type/cartType';
 
 export interface CartSliceType {
-  cartInfoBox:cartInfoBox;
+  cartInfo:cartInfo;
 }
 
 const initialState: CartSliceType = {
-  cartInfoBox:{
-    cartInfo:{
-      iteminfo:[{
-        id:'',
-        itemId: 0,
-        itemNum: 0,
-        itemSize: 0,
-        toppings: [],
-        }]
-      }
-  }
+  cartInfo:{},
 };
 
 
 //ログイン時にカートにデータが残っていたら取得する
-export const fetchCart = createAsyncThunk<cartInfoBox,string>(
+export const fetchCart = createAsyncThunk<cartInfo,string>(
     'CartSlice/fetchCart',
     async (uid) => {
-      const snapShot = await db.collection(`admin/${uid}/orders`).get();
-      let cartInfoBox:cartInfoBox = {}
+      console.log('フェッチがうごいてます');
+      const snapShot = await db.collection(`users/${uid}/orders`).get();
+      let cartInfo:cartInfo = {}
       snapShot.forEach(doc => {
            if(doc.data().status === 0) {
-            cartInfoBox.cartInfo = doc.data();
-            cartInfoBox.id = doc.id;
+            doc.data() 
+            cartInfo = doc.data();
+            cartInfo.id = doc.id;
            }
       }) 
       // The value we return becomes the `fulfilled` action payload
-      return  cartInfoBox;
+      return  cartInfo;
     }
   );
+
+//ログインしていたらカートを作る
+export const createCart = createAsyncThunk<cartInfo,{newCartInfo:cartInfo, uid:string}>(
+  'CartSlice/createCart',
+  async ({newCartInfo, uid}) => {
+    console.log('クリエイトがうごいてます');
+    if(uid){
+      const doc = await db.collection(`users/${uid}/orders`).add(newCartInfo)
+      newCartInfo.id = doc.id;
+      return newCartInfo
+    } else {
+      newCartInfo.id = null;
+      return newCartInfo
+    }
+  }
+)
+
+//カートに商品を追加する処理
+export const updateCart = createAsyncThunk<cartInfo,{newCartInfo:cartInfo, uid:string}>(
+  'CartSlice/updateCart',
+  async ({newCartInfo, uid}) => {
+    if(uid){
+      if (newCartInfo.id !== null){
+        console.log('アップデートがうごいてます');
+      await db.collection(`users/${uid}/orders`).doc(newCartInfo.id).update({iteminfo: newCartInfo.iteminfo})
+      }
+      return newCartInfo
+    } else {
+      return newCartInfo
+    }
+  }
+)
+
+//
 
 
 
@@ -53,7 +79,11 @@ export const CartSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchCart.fulfilled, (state, action) => {
-        state.cartInfoBox = action.payload;
+        state.cartInfo = action.payload;
+      }).addCase(createCart.fulfilled,(state, action) => {
+        state.cartInfo = action.payload;
+      }).addCase(updateCart.fulfilled, (state, action) => {
+        state.cartInfo = action.payload;
       })
   },
 });
@@ -63,7 +93,7 @@ export const CartSlice = createSlice({
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
-export const selectCartInfoBox = (state: RootState) => state.cartSlice.cartInfoBox;
+export const selectCartInfoBox = (state: RootState) => state.cartSlice.cartInfo;
 
 // We can also write thunks by hand, which may contain both sync and async logic.
 // Here's an example of conditionally dispatching actions based on current state.
