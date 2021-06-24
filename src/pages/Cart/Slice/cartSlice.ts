@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState} from '../../../app/store';
 import { db } from '../../../firebase';
 import { cartInfo } from '../Type/cartType';
+import { userInfo } from '../Type/cartType';
 
 export interface CartSliceType {
   cartInfo:cartInfo;
@@ -63,7 +64,37 @@ export const updateCart = createAsyncThunk<cartInfo,{newCartInfo:cartInfo, uid:s
   }
 )
 
-//
+//ログインしてない人のカート取得処理
+export const fetchCartNoUser = createAsyncThunk<cartInfo,cartInfo>(
+  'CartSlice/fetchCartNoUser',
+  async (newCartInfo) => {
+      return newCartInfo
+  }
+)
+
+export const deleteCart = createAsyncThunk<cartInfo,{newCartInfo:cartInfo, uid:string|null}>(
+  'CartSlice/fetchDeleteCart',
+  async ({newCartInfo,uid}) => {
+    if (uid && newCartInfo.id) { 
+      console.log(newCartInfo)
+      await db.collection(`users/${uid}/orders`)
+              .doc(newCartInfo.id)
+              .update({iteminfo: newCartInfo.iteminfo})
+              console.log('削除語')
+            }
+    return newCartInfo
+  }
+)
+
+export const order = createAsyncThunk<cartInfo, {userdata:userInfo,uid:string,cartId:string}>(
+  'CartSlice/order',
+  async ({ userdata, uid, cartId }) => {
+    db.collection(`users/${uid}/orders`)
+    .doc(cartId)
+    .update(userdata)
+    return {}
+  }
+)
 
 
 
@@ -84,6 +115,12 @@ export const CartSlice = createSlice({
         state.cartInfo = action.payload;
       }).addCase(updateCart.fulfilled, (state, action) => {
         state.cartInfo = action.payload;
+      }).addCase(fetchCartNoUser.fulfilled,(state, action) => {
+        state.cartInfo = action.payload
+      }).addCase(deleteCart.fulfilled,(state,action) => {
+        state.cartInfo = action.payload
+      }).addCase(order.fulfilled, (state,action) => {
+        state.cartInfo = action.payload
       })
   },
 });

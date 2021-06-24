@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../app/store";
 import axios from "axios";
+import { userInfo } from "../Type/cartType";
+import { order } from "../Slice/cartSlice";
 import {
   Button,
   Grid,
@@ -16,13 +18,12 @@ import {
   Box,
 } from "@material-ui/core";
 import { db } from "../../../firebase/index";
-// import { order } from "../../actions";
 import { cartInfo } from "../Type/cartType";
-// import {
-//   ORDER_STATUS_PAID,
-//   ORDER_STATUS_UNPAID,
-//   TOKEN_CHECK,
-// } from "../../status/index";
+import {
+  ORDER_STATUS_PAID,
+  ORDER_STATUS_UNPAID,
+  TOKEN_CHECK,
+} from "../statusConstant/statusConstant";
 // import {sendEmail} from '../../status/functions'
 
 interface Props {
@@ -48,20 +49,20 @@ export const Order = (props:Props) => {
   const [cardNoFlag, setCardNoflag] = useState(false); //カードナンバーの判定用
   const [timeError, setTimeError] = useState("");
   const [timeFlag, setTimeFlag] = useState(false);
-  // const [paymentFlag, setPaymentFlag] = useState(ORDER_STATUS_UNPAID); //支払い方法の判定用 1ならカード 2なら代引き
+  const [paymentFlag, setPaymentFlag] = useState(ORDER_STATUS_UNPAID); //支払い方法の判定用 1ならカード 2なら代引き
   const [creditShowFlag, setcreditShowFlag] = useState(false);
   const items = useSelector((state:RootState) => state.commonSlice.itemData);
   const toppings = useSelector((state:RootState) => state.commonSlice.toppingData);
 
   //firestoreからデータ取得
-  const [userdata, setUserdata] = useState({
+  const [userdata, setUserdata] = useState<userInfo>({
     name: "",
     address: "",
     email: "",
     cardNo: "",
     date: "",
-    // payment: ORDER_STATUS_UNPAID,
-    // status: ORDER_STATUS_UNPAID,
+    payment: ORDER_STATUS_UNPAID as number,
+    status: ORDER_STATUS_UNPAID as number,
     tel: "",
     zip: "",
   });
@@ -70,17 +71,18 @@ export const Order = (props:Props) => {
   const history = useHistory();
   const handleLink = (path:string) => history.push(path);
 
-  // useEffect(() => {
-  //   db.collection(`users/${props.uid}/userInfo`)
-  //     .get()
-  //     .then((snapShot) => {
-  //       setUserdata({
-  //         ...snapShot.docs[0].data()
-  //         status: ORDER_STATUS_UNPAID,
-  //         payment: ORDER_STATUS_UNPAID,
-  //       });
-  //     });
-  // }, []);
+  useEffect(() => {
+    db.collection(`users/${props.uid}/userInfo`)
+      .get()
+      .then((snapShot) => {
+        console.log(snapShot.docs[0].data())
+        setUserdata({
+          ...snapShot.docs[0].data() as userInfo,
+          status: ORDER_STATUS_UNPAID,
+          payment: ORDER_STATUS_UNPAID,
+        });
+      });
+  }, [props.uid]);
 
   //名前のバリデーションーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
   const checkname = (e:React.ChangeEvent<HTMLInputElement>) => {
@@ -176,68 +178,68 @@ export const Order = (props:Props) => {
   };
 
   //配達日時のバリデーションーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
-  // let today = new Date(); //日付選択で今日より前の日付を選べないようにする
-  // let thisYear = today.getFullYear();
-  // let thisMonth = ("00" + (today.getMonth() + 1)).slice(-2);
-  // let thisDate = ("00" + today.getDate()).slice(-2);
-  // today = `${thisYear}-${thisMonth}-${thisDate}T00:00`;
+  let today:Date|string = new Date(); //日付選択で今日より前の日付を選べないようにする
+  let thisYear = today.getFullYear();
+  let thisMonth = ("00" + (today.getMonth() + 1)).slice(-2);
+  let thisDate = ("00" + today.getDate()).slice(-2);
+  today = `${thisYear}-${thisMonth}-${thisDate}T00:00`;
 
-  // const checkdate = (e:React.ChangeEvent<HTMLInputElement>) => {
-  //   const date = e.target.value;
-  //   //今から3時間以内が選択されたらエラーメッセージ
-  //   let clickday = new Date();
-  //   let nowTimestamp = clickday.getTime();
-  //   nowTimestamp = Math.floor(nowTimestamp / 1000);
+  const checkdate = (e:React.ChangeEvent<HTMLInputElement>) => {
+    const date = e.target.value;
+    //今から3時間以内が選択されたらエラーメッセージ
+    let clickday = new Date();
+    let nowTimestamp = clickday.getTime();
+    nowTimestamp = Math.floor(nowTimestamp / 1000);
 
-  //   const checkyear = Number(date.slice(0, 4));
-  //   const checkmonth = Number(date.slice(5, 7));
-  //   const checkday = Number(date.slice(8, 10));
-  //   const checkhour = Number(date.slice(11, 13));
-  //   const checkminutes = Number(date.slice(14, 16)); 
-  //   const selectedDay = new Date(
-  //     checkyear,
-  //     checkmonth - 1,
-  //     checkday,
-  //     checkhour - 3, //後々の条件式のために3時間分減らしている
-  //     checkminutes
-  //     );
-  //   const selectedTimestamp = Math.floor(selectedDay / 1000);
-  //   setUserdata({ ...userdata, date: date });
-  //   if (date === "") {
-  //     setTimeError("配達日時を入力して下さい");
-  //     setTimeFlag(false);
-  //   } else if (nowTimestamp > selectedTimestamp) {
-  //     setTimeError("今から3時間後の日時をご入力ください");
-  //     setTimeFlag(false);
-  //   } else {
-  //     setTimeError("");
-  //     setTimeFlag(true);
-  //   }
-  // };
+    const checkyear = Number(date.slice(0, 4));
+    const checkmonth = Number(date.slice(5, 7));
+    const checkday = Number(date.slice(8, 10));
+    const checkhour = Number(date.slice(11, 13));
+    const checkminutes = Number(date.slice(14, 16)); 
+    const selectedDay = new Date(
+      checkyear,
+      checkmonth - 1,
+      checkday,
+      checkhour - 3, //後々の条件式のために3時間分減らしている
+      checkminutes
+      );
+    const selectedTimestamp = Math.floor(Number(selectedDay) / 1000);
+    setUserdata({ ...userdata, date: date });
+    if (date === "") {
+      setTimeError("配達日時を入力して下さい");
+      setTimeFlag(false);
+    } else if (nowTimestamp > selectedTimestamp) {
+      setTimeError("今から3時間後の日時をご入力ください");
+      setTimeFlag(false);
+    } else {
+      setTimeError("");
+      setTimeFlag(true);
+    }
+  };
 
   //クレカのバリデーションーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
-  // const setPayment = (e:React.ChangeEvent<HTMLInputElement>) => {
-  //   //カード払いがチェックされた時
-  //   if (e.target.value == ORDER_STATUS_PAID) {
-  //     setUserdata({
-  //       ...userdata,
-  //       status: ORDER_STATUS_PAID,
-  //       payment: ORDER_STATUS_PAID,
-  //     });
-  //     setPaymentFlag(ORDER_STATUS_PAID);
-  //     setcreditShowFlag(true);
-  //     setCreditcardError("クレジットカード番号を入力して下さい");
-  //   } else if (ORDER_STATUS_UNPAID) {
-  //     setUserdata({
-  //       ...userdata,
-  //       status: ORDER_STATUS_UNPAID,
-  //       payment: ORDER_STATUS_UNPAID,
-  //       cardNo: "",
-  //     });
-  //     setPaymentFlag(ORDER_STATUS_UNPAID);
-  //     setcreditShowFlag(false);
-  //   }
-  // };
+  const setPayment = (e:React.ChangeEvent<HTMLInputElement>) => {
+    //カード払いがチェックされた時
+    if (Number(e.target.value)  === ORDER_STATUS_PAID) {
+      setUserdata({
+        ...userdata,
+        status: ORDER_STATUS_PAID,
+        payment: ORDER_STATUS_PAID,
+      });
+      setPaymentFlag(ORDER_STATUS_PAID);
+      setcreditShowFlag(true);
+      setCreditcardError("クレジットカード番号を入力して下さい");
+    } else if (ORDER_STATUS_UNPAID) {
+      setUserdata({
+        ...userdata,
+        status: ORDER_STATUS_UNPAID,
+        payment: ORDER_STATUS_UNPAID,
+        cardNo: "",
+      });
+      setPaymentFlag(ORDER_STATUS_UNPAID);
+      setcreditShowFlag(false);
+    }
+  };
 
   const checkCard = (e:React.ChangeEvent<HTMLInputElement>) => {
     const cardNo = e.target.value;
@@ -257,57 +259,61 @@ export const Order = (props:Props) => {
     }
   };
 
-  // const checkInput = () => {
-  //   //カード払いの時
-  //   if (paymentFlag == ORDER_STATUS_PAID) {
-  //     if (
-  //       nameFlag &&
-  //       emailFlag &&
-  //       zipFlag &&
-  //       addressFlag &&
-  //       tellFlag &&
-  //       timeFlag &&
-  //       cardNoFlag
-  //     ) {
-  //       return true;
-  //     } else {
-  //       return false;
-  //     }
-  //   } else {
-  //     if (
-  //       nameFlag &&
-  //       emailFlag &&
-  //       zipFlag &&
-  //       addressFlag &&
-  //       tellFlag &&
-  //       timeFlag
-  //     ) {
-  //       return true;
-  //     } else {
-  //       return false;
-  //     }
-  //   }
-  // };
+  const checkInput = () => {
+    //カード払いの時
+    if (paymentFlag === ORDER_STATUS_PAID) {
+      if (
+        nameFlag &&
+        emailFlag &&
+        zipFlag &&
+        addressFlag &&
+        tellFlag &&
+        timeFlag &&
+        cardNoFlag
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (
+        nameFlag &&
+        emailFlag &&
+        zipFlag &&
+        addressFlag &&
+        tellFlag &&
+        timeFlag
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
 
 
     
     //checkCardで取得したinputのvalueがcash(代引き)ならstatus=1,credit(クレカ)ならstatus=2
-  //   const confirmOrder = () => {
-  //     let check = checkInput();
-  //     if (check) {
-  //     if (window.confirm("注文してもよろしいですか？")) {
-  //       //とってきたデータそのままだとなぜかstatusがundefinedになるので入れ替えしている。
-  //       let now = new Date();
-  //       userdata.orderDate = now.getTime();
-  //       userdata.totalPrice = props.totalPrice;
-  //       dispatch(order(userdata, props.user.uid, props.cartInfo.id));
-  //       sendEmail(props,toppings,items,userdata)
-  //       handleLink(`/ordercomp/${TOKEN_CHECK}`);
-  //     }
-  //   } else {
-  //     alert("入力内容にエラーがあります");
-  //   }
-  // };
+    const confirmOrder = () => {
+      let check = checkInput();
+      if (check) {
+      if (window.confirm("注文してもよろしいですか？")) {
+        //とってきたデータそのままだとなぜかstatusがundefinedになるので入れ替えしている。
+        let now = new Date();
+        const orderDate = now.getTime();
+        const totalPrice = props.totalPrice;
+        setUserdata({...userdata,orderDate:orderDate,totalPrice:totalPrice})
+        //dispatchに渡すために変数にいれてる
+        const uid = props.uid;
+        const cartId = props.cartInfo.id as string
+        dispatch(order({userdata, uid, cartId}));
+        // sendEmail(props,toppings,items,userdata)
+        handleLink(`/ordercomp/${TOKEN_CHECK}`);
+      }
+    } else {
+      alert("入力内容にエラーがあります");
+    }
+  };
 
   return (
     <React.Fragment>
@@ -368,23 +374,23 @@ export const Order = (props:Props) => {
           <TextField
             type="datetime-local"
             variant="outlined"
-            // onChange={checkdate}
+            onChange={checkdate}
             helperText={timeError}
           />
           <div>支払方法</div>
           <FormControl>
             <RadioGroup 
-            // onChange={setPayment} value={paymentFlag}
+            onChange={setPayment} value={paymentFlag}
             >
               <FormControlLabel
                 control={<Radio />}
-                // value={ORDER_STATUS_UNPAID}
+                value={ORDER_STATUS_UNPAID}
                 label="代金引換"
                 labelPlacement="end"
               />
               <FormControlLabel
                 control={<Radio />}
-                // value={ORDER_STATUS_PAID}
+                value={ORDER_STATUS_PAID}
                 label="クレジットカード決済"
                 labelPlacement="end"
               />
@@ -406,7 +412,7 @@ export const Order = (props:Props) => {
           )}
           <div>
             <Button variant="contained" type="button" 
-            // onClick={confirmOrder}
+            onClick={confirmOrder}
             >
               この内容で注文する
             </Button>

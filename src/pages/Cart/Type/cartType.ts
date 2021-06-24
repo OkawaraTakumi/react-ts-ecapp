@@ -28,7 +28,16 @@ export type cartInfo = {
     id?:string|null
 }
 
-export type cartInfoBox = {
-    cartInfo?:cartInfo;
-    id?: string|null;
+export type userInfo = {
+    name: string
+    address: string
+    email: string
+    cardNo?: string
+    date: Date|string
+    payment: number
+    status: number
+    tel:string
+    zip: string
+    orderDate?:number
+    totalPrice?:number
 }

@@ -3,16 +3,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { Order } from "./CartComponents/Order";
 import { SumPrice } from "./CartComponents/SumPrice";
-// import { DeleteButton } from "./CartComponents/DeleteButton"
+import { DeleteButton } from "./CartComponents/DeleteButton"
 import { RootState } from "../../app/store";
-// import {
-//   fetchitems,
-//   fetchtoppings,
-//   fetchcart,
-//   fetchcartnouser,
-// } from "../actions";
 import { fetchItemData, fetchToppingData } from "../../appComponent/common/commonSlice";
-import { fetchCart } from "./Slice/cartSlice";
+import { fetchCart, fetchCartNoUser } from "./Slice/cartSlice";
 import {
   Table,
   TableBody,
@@ -39,21 +33,17 @@ export const Cart = () => {
   useEffect(() => {
     dispatch(fetchItemData());
     dispatch(fetchToppingData());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (uid) {
       dispatch(fetchCart(uid));
-    } 
-    //ログインしてない人のカートの処理
-    // else {
-    //   if (cartInfo !== null) {
-    //     dispatch(fetchcartnouser(cartInfo));
-    //   } else {
-    //     dispatch(fetchcartnouser(null));
-    //   }
-    // }
-  }, [uid,dispatch]);
+    } else {
+      if (cartInfo.iteminfo !== undefined) {
+        dispatch(fetchCartNoUser(cartInfo));
+      }
+    }
+  }, [uid, dispatch]);
 
   return (
     <div>
@@ -134,13 +124,13 @@ export const Cart = () => {
                               )}
                             </TableCell>
                             {/* 削除ボタン */}
-                            {/* {!show &&
+                            {!show &&
                               <DeleteButton
                                 cartInfo={cartInfo}
-                                user={user}
+                                uid={uid}
                                 index={index}
                               />
-                            } */}
+                            }
                           </TableRow>
                         )
                     )
