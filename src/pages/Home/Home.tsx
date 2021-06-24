@@ -1,6 +1,6 @@
 import React, { useEffect,useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchItemData } from "../../appComponent/common/commonSlice";
+import { fetchItemData, fetchToppingData } from "../../appComponent/common/commonSlice";
 import { Item } from "./HomeComponents/Item"; 
 import  Box  from '@material-ui/core/Box';
 import { RootState } from '../../app/store'
@@ -13,6 +13,7 @@ export const Home = () => {
 
   useEffect(() => { 
     dispatch(fetchItemData())
+    // dispatch(fetchToppingData());
   }, [])
 
   useEffect(() => { 
