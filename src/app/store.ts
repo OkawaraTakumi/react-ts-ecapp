@@ -3,6 +3,7 @@ import counterReducer from '../features/counter/counterSlice';
 import userReducer from '../appSlice'
 import commonSliceReducer from '../appComponent/common/commonSlice';
 import cartSliceReducer from '../pages/Cart/Slice/cartSlice'
+import orderHistoryReducer from '../pages/OrderHistory/Slice/orderHistorySlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     user: userReducer,
     commonSlice: commonSliceReducer,
     cartSlice: cartSliceReducer,
+    orderHistorySlice: orderHistoryReducer,
   },
 });
 

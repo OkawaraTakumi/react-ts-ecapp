@@ -1,7 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
-import { RootState } from './app/store'
-import { createAsyncThunk,  PayloadAction } from '@reduxjs/toolkit';
-// import { formatDiagnostic } from 'typescript';
+import { PayloadAction } from '@reduxjs/toolkit';
 
 export interface userState {
   uid: string;
@@ -12,6 +10,7 @@ const initialState: userState= {
 };
 
 
+
 export const appSlice = createSlice({
   name: 'setuser',
   initialState,
@@ -19,7 +18,7 @@ export const appSlice = createSlice({
   reducers: {
     user: (state, action:PayloadAction<userState>) => {
       state.uid = action.payload.uid
-    },
+    }
     // Use the PayloadAction type to declare the contents of `action.payload`
   },
   // The `extraReducers` field lets the slice handle actions defined elsewhere,

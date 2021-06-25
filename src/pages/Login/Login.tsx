@@ -5,6 +5,8 @@ import { useState,useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { RootState } from '../../app/store'
+import { db, sessionPersistance } from "../../firebase"; 
+import { updateCart, createCart } from "../Cart/Slice/cartSlice";
 import {
   TextField,
   Button,
@@ -24,7 +26,6 @@ export const Login = () => {
     const history = useHistory();
     const dispatch = useDispatch();
     const uid = useSelector((state:RootState) => state.user.uid)
-    // const cartInfo = useSelector((state) => state.cartinfo);
   
     //アンマウント時、ローカルストレージにデータが残っていたら削除
     useEffect(() => {
@@ -76,61 +77,72 @@ export const Login = () => {
             auth.signInWithEmailAndPassword(email, password)
             history.push("/");
           //ローカルストレージにアイテムがあった時
-          //let itemInfo = JSON.parse(localStorage.getItem("itemInfo"));
+          let itemInfo = JSON.parse(localStorage.getItem("itemInfo") as string);
+          console.log(itemInfo)
           //ログイン処理
-        //   auth.setPersistence(sessionPersistance).then(() => {
-        //     auth.signInWithEmailAndPassword(email, password)
-        //     .then((user) => {
-        //       //ローカルにアイテムが保存されていた場合はdbのカートへ追加もしくは新規カート作成を行う
-        //       if (itemInfo) {
-        //         db.collection(`users/${user.user.uid}/orders`)
-        //           .get()
-        //           .then((snapShot) => {
-        //             //そもそもorderにdoc自体が存在するかどうかをチェック
-        //             if (snapShot.empty === false) {
-        //               let cartExist = false;
-        //               snapShot.forEach((doc) => {
-        //                 //statusがカート状態のものがあった場合
-        //                 if (doc.data().status === 0) {
-        //                   cartExist = true;
-        //                   let newCartInfo = JSON.parse(
-        //                     JSON.stringify(doc.data())
-        //                   );
-        //                   newCartInfo.id = doc.id;
-        //                   newCartInfo.itemInfo = [
-        //                     ...newCartInfo.itemInfo,
-        //                     ...itemInfo,
-        //                   ];
-        //                   dispatch(updatecart(newCartInfo, user.user.uid));
-        //                 }
-        //               });
-        //               //statusがカート状態のものがなかった場合
-        //               if (cartExist === false) {
-        //                 let newCartInfo = {
-        //                   itemInfo: [...itemInfo],
-        //                   status: 0,
-        //                   userId: user.user.uid,
-        //                 };
-        //                 dispatch(createcart(newCartInfo, user.user.uid));
-        //               }
-        //               //doc自体が存在しなかった時はdbにdocを作る。
-        //             } else if (snapShot.empty === true) {
-        //               let newCartInfo = {
-        //                 itemInfo: [...itemInfo],
-        //                 status: 0,
-        //                 userId: user.user.uid,
-        //               };
-        //               dispatch(createcart(newCartInfo, user.user.uid));
-        //             }
-        //           });
-        //         localStorage.removeItem("itemInfo");
-        //         history.push("/cart");
-        //       } else {
-        //         history.push("/");
-        //       }
-        //     })
-        //     .catch(() => alert('メールアドレスかパスワード、またはその両方がが間違っています'))
-        //   }); 
+          auth.setPersistence(sessionPersistance).then(() => {
+            auth.signInWithEmailAndPassword(email, password)
+            .then((user) => {
+              const uid = user.user!.uid;
+              console.log('ログインしました')
+              //ローカルにアイテムが保存されていた場合はdbのカートへ追加もしくは新規カート作成を行う
+              if (itemInfo) {
+                console.log(itemInfo,'ローカルストレージが存在します')
+                db.collection(`users/${uid}/orders`)
+                  .get()
+                  .then((snapShot) => {
+                    console.log('スナップショットをとって来ました')
+                    //そもそもorderにdoc自体が存在するかどうかをチェック
+                    if (snapShot.empty === false) {
+                      console.log('スナップショットにドックが存在します')
+                      let cartExist = false;
+                      snapShot.forEach((doc) => {
+                        //statusがカート状態のものがあった場合
+                        if (doc.data().status === 0) {
+                          console.log(doc.data(),'ステータスが0のものが存在します')
+                          cartExist = true;
+                          let newCartInfo = JSON.parse(
+                            JSON.stringify(doc.data())
+                          );
+                          console.log(newCartInfo.iteminfo)
+                          newCartInfo.id = doc.id;
+                          newCartInfo.iteminfo = [
+                            ...newCartInfo.iteminfo,
+                            ...itemInfo,
+                          ];
+                          dispatch(updateCart({newCartInfo, uid}));
+                        }
+                      });
+                      //statusがカート状態のものがなかった場合
+                      if (cartExist === false) {
+                        console.log('ステータスが0のものがありません')
+                        let newCartInfo = {
+                          itemInfo: [...itemInfo],
+                          status: 0,
+                          userId: uid,
+                        };
+                        console.log(newCartInfo)
+                        dispatch(createCart({newCartInfo, uid}));
+                      }
+                      //doc自体が存在しなかった時はdbにdocを作る。
+                    } else if (snapShot.empty === true) {
+                      console.log('doc自体が存在しません')
+                      let newCartInfo = {
+                        itemInfo: [...itemInfo],
+                        status: 0,
+                        userId: uid,
+                      };
+                      dispatch(createCart({newCartInfo, uid}));
+                    }
+                  });
+                localStorage.removeItem("itemInfo");
+                history.push("/cart");
+              } else {
+                history.push("/");
+              }
+            })
+            .catch(() => alert('メールアドレスかパスワード、またはその両方がが間違っています'))
+          }); 
         } else {
           alert('入力に誤りがあります');
         }
