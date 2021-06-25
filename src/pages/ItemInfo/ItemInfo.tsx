@@ -198,15 +198,13 @@ export const ItemInfo = () => {
       uid = '';
     } 
     //カートにアイテムが入っていたら中身も一緒に渡す。
-    console.log(cartInfo.iteminfo !== undefined)
     if (cartInfo.iteminfo !== undefined) {
       if (typeof cartInfo !== 'undefined'){
-        // if(typeof cartInfo.iteminfo !== 'undefined'){
-        //   // cartInfo.iteminfo = [...(cartInfo.iteminfo), item as iteminfoArrayType];
-        // }
+        console.log(cartInfo.iteminfo !== undefined)
       let newCartInfo:any = JSON.stringify(cartInfo);
       newCartInfo = JSON.parse(newCartInfo);
       newCartInfo.iteminfo = [...(cartInfo.iteminfo), item as iteminfoArrayType]
+      console.log('アップデートを呼び出し') 
       dispatch(updateCart({newCartInfo, uid}));
       }
       history.push("/cart");

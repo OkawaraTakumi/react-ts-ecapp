@@ -47,7 +47,9 @@ export const Header = () => {
   const history = useHistory();
 
   const doLogout = () => {
+    console.log(9)
     auth.signOut().then(() => {
+      console.log('ログアウトしました')
       history.push("/");
     });
   };

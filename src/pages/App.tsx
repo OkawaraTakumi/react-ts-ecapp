@@ -11,13 +11,14 @@ import { useEffect } from 'react'
 import { auth } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { user } from '../appSlice';
+import { unset } from './Cart/Slice/cartSlice'
 import { Header } from '../appComponent/Header';
 import {
   BrowserRouter as Router,
   Switch,
   Route,
 } from "react-router-dom"
-import firebase from 'firebase';
+// import firebase from 'firebase';
 
 function App() {
   const dispatch = useDispatch();
@@ -27,6 +28,10 @@ function App() {
       if(person) {
           const uid = person.uid
           dispatch(user({uid}))
+      } else {
+        const uid = ''
+        dispatch(user({uid}))
+        dispatch(unset({}))
       }
     } )
   })

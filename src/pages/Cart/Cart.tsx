@@ -6,7 +6,7 @@ import { SumPrice } from "./CartComponents/SumPrice";
 import { DeleteButton } from "./CartComponents/DeleteButton"
 import { RootState } from "../../app/store";
 import { fetchItemData, fetchToppingData } from "../../appComponent/common/commonSlice";
-import { fetchCart, fetchCartNoUser } from "./Slice/cartSlice";
+import { fetchCart } from "./Slice/cartSlice";
 import {
   Table,
   TableBody,
@@ -38,10 +38,6 @@ export const Cart = () => {
   useEffect(() => {
     if (uid) {
       dispatch(fetchCart(uid));
-    } else {
-      if (cartInfo.iteminfo !== undefined) {
-        dispatch(fetchCartNoUser(cartInfo));
-      }
     }
   }, [uid, dispatch]);
 
@@ -49,13 +45,14 @@ export const Cart = () => {
     <div>
       <Grid container>
         <Button
-        //   styel={{ marginBottom: "20px" }}
+          style={{ marginBottom: "20px" }}
           onClick={() => history.push("/")}
         >
           <ArrowBackIcon />
         </Button>
         <h2>ショッピングカート</h2>
       </Grid>
+      {/* {console.log(cartInfo.iteminfo)} */}
       {cartInfo.iteminfo !== undefined ? (
         cartInfo.iteminfo.length !== 0 ? (
           <React.Fragment>
