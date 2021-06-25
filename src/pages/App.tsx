@@ -18,7 +18,7 @@ import {
   Switch,
   Route,
 } from "react-router-dom"
-// import firebase from 'firebase';
+import { unsetOrder } from './OrderHistory/Slice/orderHistorySlice';
 
 function App() {
   const dispatch = useDispatch();
@@ -32,6 +32,7 @@ function App() {
         const uid = ''
         dispatch(user({uid}))
         dispatch(unset({}))
+        dispatch(unsetOrder())
       }
     } )
   })

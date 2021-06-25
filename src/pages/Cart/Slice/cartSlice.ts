@@ -92,12 +92,12 @@ export const deleteCart = createAsyncThunk<cartInfo,{newCartInfo:cartInfo, uid:s
   }
 )
 
-export const order = createAsyncThunk<cartInfo, {userdata:userInfo,uid:string,cartId:string}>(
+export const order = createAsyncThunk<cartInfo, {newUserData:userInfo,uid:string,cartId:string}>(
   'CartSlice/order',
-  async ({ userdata, uid, cartId }) => {
+  async ({ newUserData, uid, cartId }) => {
     await db.collection(`users/${uid}/orders`)
     .doc(cartId)
-    .update(userdata)
+    .update(newUserData)
     return {}
   }
 )
