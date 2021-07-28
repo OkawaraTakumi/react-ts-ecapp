@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState} from '../../app/store';
 import { ItemdataObj, Toppingdataobj } from './commonType'
-import { db } from '../../firebase';
+import { db } from '../../firebase/index';
 
 export interface CommonSliceType {
   itemData:ItemdataObj[];

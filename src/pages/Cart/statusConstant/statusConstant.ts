@@ -3,6 +3,13 @@
 // export const TOPPINGS_TABLE_ID = "Jc8Ne4Bnwxjd286jYN50";
 // export const USERS_TABLE_ID = "U0Aa4TNozNxJWRpjD6gx";
 
+export const timestampToDate = (timestamp:number) => {
+    let dateTime = new Date(timestamp)
+  let date = dateTime.toLocaleDateString(); // => 2019/9/4
+    let time = dateTime.toLocaleTimeString("ja-JP"); // => 12:03:35
+  return date + " " + time;
+};
+
 //商品のサイズ
 export const SIZE_M = 0;
 export const SIZE_L = 1;

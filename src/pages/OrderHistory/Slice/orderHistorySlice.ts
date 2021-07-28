@@ -13,7 +13,7 @@ const initialState: OrderHistorySliceType = {
 
 
 //ログイン時にカートにデータが残っていたら取得する
-export const fetchOrderInfo = createAsyncThunk<orderInfo[],string>(
+export const fetchOrderInfo = createAsyncThunk<orderInfo[],string|null>(
     'CartSlice/fetchOrderInfo',
     async (uid) => {
         const orders:orderInfo[] = []

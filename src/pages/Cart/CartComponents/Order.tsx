@@ -302,11 +302,17 @@ export const Order = (props:Props) => {
         let now = new Date();
         const orderDate = now.getTime();
         const totalPrice = props.totalPrice;
+        let newUserData:userInfo = JSON.parse(
+          JSON.stringify(userdata)
+        );
+        console.log(newUserData)
+        newUserData.orderDate = orderDate;
+        newUserData.totalPrice = totalPrice;
         setUserdata({...userdata,orderDate:orderDate,totalPrice:totalPrice})
         //dispatchに渡すために変数にいれてる
         const uid = props.uid;
         const cartId = props.cartInfo.id as string
-        dispatch(order({userdata, uid, cartId}));
+        dispatch(order({newUserData, uid, cartId}));
         // sendEmail(props,toppings,items,userdata)
         handleLink(`/ordercomp/${TOKEN_CHECK}`);
       }
