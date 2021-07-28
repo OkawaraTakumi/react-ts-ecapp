@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState} from '../../../app/store';
 import { db } from '../../../firebase';
 import { cartInfo } from '../Type/cartType';
@@ -22,7 +22,6 @@ export const fetchCart = createAsyncThunk<cartInfo,string>(
       let cartInfo:cartInfo = {}
       snapShot.forEach(doc => {
            if(doc.data().status === 0) {
-             console.log('status0のやつがいるよ')
             doc.data() 
             cartInfo = doc.data();
             cartInfo.id = doc.id;
@@ -109,7 +108,7 @@ export const CartSlice = createSlice({
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    unset: (state, action) => {
+    unset: (state, action:PayloadAction<cartInfo>) => {
       state.cartInfo = action.payload
     }
   },

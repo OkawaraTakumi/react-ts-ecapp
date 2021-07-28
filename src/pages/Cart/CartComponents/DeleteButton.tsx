@@ -6,8 +6,8 @@ import { deleteCart } from "../Slice/cartSlice";
 
 
 interface Props {
-    cartInfo:cartInfo
-    uid:string
+    cartInfo:cartInfo|null
+    uid:string | null
     index:number
 }
 
